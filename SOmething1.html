@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: black;
+        }
+
+        li {
+            float: left;
+        }
+
+        li button, .dropbtn {
+            display: inline-block;
+            color: #ffffff;
+            text-align: center;
+            /*padding: 14px 16px;*/
+            text-decoration: none;
+            background-color: #2c2c2c;
+            width: 12em;
+        }
+
+        li button:hover, .dropdown:hover .dropbtn {
+            background-color: red;
+        }
+
+        li.dropdown {
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            /*box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);*/
+        }
+
+        .dropdown-content button {
+            color: black;
+            /*padding: 12px 16px;*/
+            text-decoration: none;
+            display: block;
+            text-align: left;
+            color: #ffffff
+        }
+
+        /*.dropdown-content a:hover {background-color: #f1f1f1}*/
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<ul>
+    <li>
+        <button onclick="ADD()">ADD</button>
+    </li>
+    <li>
+        <button onclick="SAVE()">SAVE</button>
+    </li>
+    <!--<li class="dropdown">-->
+    <!--<a href="javascript:void(0)" class="dropbtn">SPECIAL SORT</a>-->
+    <!--<div class="dropdown-content">-->
+
+    <!--<input type="checkbox" id="nameSelected"> Sort by name<br>-->
+    <!--<input type="checkbox" id="qualSelected"> Sort by qualification<br>-->
+    <!--<input type="checkbox" id="vehicleSelected"> Sort by vehicle<br>-->
+    <!--<input type="checkbox" id="distanceSelected"> Sort by distance<br>-->
+    <!--<input type="submit" value="Submit">-->
+
+    <!--</div>-->
+
+    <li class="dropdown">
+        <a href="javascript:void(0)" class="dropbtn">SORT</a>
+
+        <div class="dropdown-content">
+            <button onclick="sortName()">SORT NAME</button>
+            <button onclick="sortQual()">SORT QUAL</button>
+            <button onclick="sortVehicle()">SORT VEHICLE</button>
+            <button onclick="sortDistance()">SORT DISTANCE</button>
+        </div>
+    <li>
+        <button onclick="DRAW()">DRAW</button>
+    </li>
+    <li>
+        <button onclick="CLEAR()">CLEAR</button>
+    </li>
+
+</ul>
+
+<p id="driverInfo"></p>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script type="text/javascript" src="jquery.sortElements.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAD2H9bS_-GCDwqR14E9ESCDRoj03s1CJk&callback=initMap">
+</script>
+<script src="https://roads.googleapis.com/v1/snapToRoads?parameters&key=AIzaSyAD2H9bS_-GCDwqR14E9ESCDRoj03s1CJk"></script>
+<script type="text/javascript"
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAD2H9bS_-GCDwqR14E9ESCDRoj03s1CJk&libraries=drawing">
+</script>
+
+
+
+<head>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+    </style>
+</head>
+<body>
+<!--<body background="LM.jpg">-->
+<table id="example" class="display" cellspacing="0" width="100%" align="center">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Qualification</th>
+        <th>Vehicle</th>
+        <th>Distance</th>
+        <th>Latitude and longitude</th>
+    </tr>
+    </thead>
+    <tbody class="table-body">
+    <tr>
+    </tr>
+    </tbody>
+</table>
+
+<style>
+    /* Always set the map height explicitly to define the size of the div
+     * element that contains the map. */
+    #map {
+        height: 100%;
+    }
+
+     /*Optional: Makes the sample page fill the window. */
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+</style>
+<div id="map"></div>
+<script>
+
+    var driverDB = [];
+
+    function DriverName() {
+        var name = prompt("Please enter the driver's name", "George");
+        return name;
+    }
+
+    function Qualifications() {
+        var qual = prompt("Please enter the driver's licence type", "Manual");
+        return qual;
+    }
+
+    function Vehicle() {
+        var vehicle = prompt("Please add the type of vehicle the driver drives", "Car");
+        return vehicle;
+    }
+
+
+    function Driver(name, qual, vehicle) {
+        this.name = name;
+        this.qual = qual;
+        this.vehicle = vehicle;
+        this.details = function () {
+            return name + " " + qual + " " + vehicle;
+        }
+    }
+
+    var storageArr = [];
+
+    var lat1 = -27.570904;
+    var lon1 = 153.078524;
+
+    var pathArr = [];
+
+
+    var Latlng = {lat: lat1, lng: lon1};
+
+    var map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 11,
+        center: Latlng,
+        mapTypeId: 'terrain'
+    });
+
+    function ADD() {
+
+        var name = DriverName();
+        var qual = Qualifications();
+        var vehicle = Vehicle();
+
+        var randomAddX = Math.random() * 10;
+        randomAddX *= Math.floor(Math.random() * 2) == 1 ? 1 : -1;
+
+        var randomAddY = Math.random() * 10;
+        randomAddY *= Math.floor(Math.random() * 2) == 1 ? 1 : -1;
+
+        var lat2 = -27.570904 + randomAddX / 100;
+        var lon2 = 153.078524 + randomAddY / 100;
+
+        //console.log(lat1 + "," + lon1 + ", " + lat2 + "," + lon2)
+
+        var R = 6371e3; // metres
+        var lat1R = lat1 * (Math.PI / 180);
+        var lat2R = lat2 * (Math.PI / 180);
+        var lon2R = lon2 * (Math.PI / 180);
+        var lon1R = lon1 * (Math.PI / 180);
+        var deltaLat = (lat2R - lat1R);
+        var deltaLamb = (lon2R - lon1R);
+
+        var distance = 2 * R * Math.asin(
+                        Math.sqrt(
+                                Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2)
+                                + Math.cos(lat1R) * Math.cos(lat2R)
+                                * Math.sin(deltaLamb / 2) * Math.sin(deltaLamb / 2)))
+
+        distance = ((distance / 1000)).toFixed(4);
+
+        var latLong = lat2.toFixed(4) + "," + lon2.toFixed(4);
+
+        var inputData = {
+            'name': name,
+            'qual': qual,
+            'vehicle': vehicle,
+            'distance': distance,
+            'latLong': latLong
+        };
+
+        var pathData = {'lat': lat2, 'lng': lon2, 'distance': distance};
+        pathArr.push(pathData);
+
+        storageArr.push(inputData);
+
+
+        createTable(storageArr, $("#example"));
+
+        initMap(lat1, lon1, lat2, lon2, name, qual, vehicle, distance);
+
+    }
+
+
+    function initMap(lat1, lon1, lat2, lon2, name, qual, vehicle, distance) {
+
+        var original = {lat: lat1, lng: lon1};
+        var LatLng = {lat: lat2, lng: lon2};
+
+        var position = new google.maps.Marker({
+            position: original,
+            map: map,
+            title: 'position',
+            icon: 'darkgreen_MarkerA.png'
+        });
+
+        var marker = new google.maps.Marker({
+            position: LatLng,
+            map: map,
+            title: name + ", " + qual + ", " + vehicle + ", " + distance + "Km",
+            icon: 'orange_MarkerB.png'
+        });
+
+        var sorted = pathArr.sort(function (a, b) {
+            var aValue = Math.abs(parseFloat(a['distance']));
+            var bValue = Math.abs(parseFloat(b['distance']));
+
+            if (typeof aValue && bValue == "number") {
+                return (aValue > bValue) ? 1 : ((bValue > aValue) ? -1 : 0);
+            }
+
+            return (aValue > bValue) ? 1 : ((bValue > aValue) ? -1 : 0);
+        });
+        console.log(sorted);
+
+        pathCoordinate = [{lat: lat1,  lng: lon1}, {lat: sorted[0].lat, lng: sorted[0].lng}];
+
+        line = new google.maps.Polyline({
+            path: pathCoordinate,
+            geodesic: true,
+            strokeColor: '#FF0000',
+            strokeOpacity: 1.0,
+            strokeWeight: 2
+        });
+
+        line.setMap(map);
+        //line.setMap(null);
+
+    }
+
+    var marker ;
+    function createMarker(lat, long,name,map) {
+        var lat = parseFloat(lat);
+        var long = parseFloat(long);
+        var coordinate = {lat: lat, lng: long};
+        marker = new google.maps.Marker({
+            position: coordinate,
+            map: map,
+            title: name,
+            icon: 'darkgreen_MarkerA.png'
+        });
+
+    }
+
+    function SAVE() {
+        var textToSave = JSON.stringify(storageArr);
+
+        var hiddenElement = document.createElement('a');
+
+        hiddenElement.href = 'data:attachment/text,' + encodeURI(textToSave);
+        hiddenElement.target = '_blank';
+        hiddenElement.download = 'myFile.json';
+        hiddenElement.click();
+
+        //console.log()
+    }
+
+    function createTable(arr, table) {
+
+        //delet already existing rows
+        $("#example").find(".table-body").empty();
+
+
+        //create rows with sortable values
+        arr.forEach(function (row) {
+            var newTr = $('<tr/>');
+            $.each(row, function (key, value) {
+                var newCell = $('<td/>')
+                        .text(value)
+                        .addClass(key);
+
+                newTr.append(newCell)
+                        .css("text-align", "center");
+            });
+            $('<td><button class="delete" >Delete</button></td>').appendTo(newTr);
+            $(table).find('.table-body').append(newTr);
+        });
+        $('.delete').click(function () {
+            var idx = $('.delete').index(this);
+            storageArr.splice(idx, 1);
+            $("#example").find(".table-body").empty();
+            createTable(storageArr, $("#example"));
+        })
+
+    }
+
+
+    function appendTableColumn(table, rowData) {
+
+        var lastRow = $('<tr/>').appendTo(table.find('.table-body'));
+        $.each(rowData, function (key, value) {
+            var newCell = $('<td/>')
+                    .text(value)
+                    .addClass(key);
+
+            lastRow.append(newCell)
+                    .css("text-align", "center");
+        });
+
+        $('<td><button class="delete" >Delete</button></td>').appendTo(lastRow);
+
+
+    }
+
+    function onDeleteClick(event) {
+
+        var currentButton = $(event.currentTarget);
+        var currentRow = currentButton.closest("tr");
+
+        currentRow.remove();
+        storageArr.splice(currentButton.closest("tr"), 0);
+    }
+
+    function FIND() {
+
+
+        var num = 25;
+        var nearestObj = null;
+
+        for (var i = 0; i < storageArr.length; i++) {
+            if (storageArr[i].distance < num) {
+                num = storageArr[i].distance;
+                nearestObj = storageArr[i];
+            }
+        }
+
+        //alert("the closest driver is: " + JSON.stringify(nearestObj));
+        console.log("the closest driver is: " + JSON.stringify(nearestObj));
+    }
+
+    var action = 1;
+
+
+    function sortName() {
+        if (action == 1) {
+            finder(storageArr, "name");
+            action = 2;
+        } else {
+            finder2(storageArr, "name");
+            action = 1;
+        }
+    }
+    function sortQual() {
+        if (action == 1) {
+            finder(storageArr, "qual");
+            action = 2;
+        } else {
+            finder2(storageArr, "qual");
+            action = 1;
+        }
+    }
+    function sortVehicle() {
+        if (action == 1) {
+            finder(storageArr, "vehicle");
+            action = 2;
+        } else {
+            finder2(storageArr, "vehicle");
+            action = 1;
+        }
+    }
+    function sortDistance() {
+        if (action == 1) {
+            finder(storageArr, "distance");
+            action = 2;
+        } else {
+            finder2(storageArr, "distance");
+            action = 1;
+        }
+    }
+
+
+    function finder(array, criteria) {
+
+        var sorted = array.sort(function (a, b) {
+            var aValue = a[criteria];
+            var bValue = b[criteria];
+
+            if (criteria == "distance") {
+                aValue = Math.abs(parseFloat(aValue));
+                bValue = Math.abs(parseFloat(bValue));
+                return (aValue > bValue) ? 1 : ((bValue > aValue) ? -1 : 0);
+            }
+
+            return (aValue > bValue) ? 1 : ((bValue > aValue) ? -1 : 0);
+        });
+
+        createTable(sorted, $("#example"));
+    }
+
+    function finder2(array, criteria) {
+
+        var sorted = array.sort(function (a, b) {
+            var aValue = a[criteria];
+            var bValue = b[criteria];
+
+            if (criteria == "distance") {
+                aValue = Math.abs(parseFloat(aValue));
+                bValue = Math.abs(parseFloat(bValue));
+                return (aValue > bValue) ? 1 : ((bValue > aValue) ? -1 : 0);
+            }
+
+            return (aValue > bValue) ? 1 : ((bValue > aValue) ? -1 : 0);
+        });
+
+        createTable(sorted, $("#example"));
+    }
+
+
+    function CLEAR() {
+        $("#example").find(".table-body").empty();
+        var emptyArr = [];
+        storageArr = [];
+        createTable(emptyArr, $("#example"));
+    }
+
+</script>
+</body>
+</html>
