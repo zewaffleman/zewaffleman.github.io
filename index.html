@@ -28,8 +28,6 @@
       }
     </style>
 
-
-
 <style>
         input[type=text] {
             width: 25%%;
@@ -53,13 +51,12 @@
   </head>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-  <script type="text/javascript" src="jquery.sortElements.js"></script>
-
   <body>
+
     <div id="input">
       <form >
-          <input type="text" name="Start" value="Start" id = "start"><br>
-          <input type="text" name="End  " value="End" id = "end"><br>
+          <input type="text" name="Start" value="Japan" id = "start"><br>
+          <input type="text" name="End  " value="Brisbane" id = "end"><br>
           <input type="text" name="TextBox3" value="Distance "id="txtresult" ><br>
 
       </form>
@@ -71,15 +68,19 @@
     <div id="map"></div>
     <script>
     var APIKEY = "AIzaSyAD2H9bS_-GCDwqR14E9ESCDRoj03s1CJk";
-
     var startURL = "https://maps.googleapis.com/maps/api/geocode/json?address=";
     var latLng1;
     var latLng2;
     var name1;
     var name2;
+    var polygon1 = [];
+    var polygon2 = [];
+    var data1 = [];
+    var data2 = [];
 
 
     function getInput() {
+
       var start = document.getElementById('start').value;
       var end   = document.getElementById('end').value;
 
@@ -87,29 +88,45 @@
       var URL2 =  startURL +end+ "&key=" + APIKEY;
       var obj;
 
+      console.time('fetching data');
       $.get( URL1, function( data ) {
-        console.log(data);
+        //console.log(data);
         obj = data.results[0];
         var geo = obj.geometry;
         latLng1 = geo.location;
-
+        var bounds = geo.bounds;
+        var NE = bounds.northeast;
+        var SW = bounds.southwest;
+        polygon1 = [];
+        polygon1.push(NE);
+        polygon1.push(SW);
         name1 = obj.formatted_address;
-          console.log(name1);
+        data1 = data;
+
       });
 
       $.get( URL2, function( data ) {
-        console.log(data);
         obj = data.results[0];
         var geo = obj.geometry;
         latLng2 = geo.location;
-
+        var bounds = geo.bounds;
+        var NE = bounds.northeast;
+        var SW = bounds.southwest;
+        polygon1 = [];
+        polygon2.push(NE);
+        polygon2.push(SW);
         name2 = obj.formatted_address;
+        data2 = data;
+
+
       });
+      console.time('fetching data');
 
         initMap();
         distance();
 
     }
+
 
     function initMap() {
 
@@ -143,6 +160,8 @@
         line.setMap(map);
       }
 
+
+
     function distance(){
 
       lat1R = latLng1.lat;
@@ -167,8 +186,9 @@
 
       distance = ((distance / 1000)).toFixed(4);
       distance = distance + " Km";
-      console.log(distance);
       document.getElementById("txtresult").value = distance;
+
+
         google.maps.event.trigger(map, 'resize');
     }
 
