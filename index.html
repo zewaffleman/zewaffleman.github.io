@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAD2H9bS_-GCDwqR14E9ESCDRoj03s1CJk&callback=initMap"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
   <head>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
@@ -46,12 +49,19 @@
             background-color: lightgreen;
         }
 
+         input.ng-invalid {
+           background-color:pink;
+         }
+        input.ng-valid {
+          background-color:lightgreen;
+        }
+
 
 </style>
   </head>
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-  <body>
+
+  <body ng-app="">
 
     <div id="input">
       <form >
@@ -90,7 +100,6 @@
 
       console.time('fetching data');
       $.get( URL1, function( data ) {
-        //console.log(data);
         obj = data.results[0];
         var geo = obj.geometry;
         latLng1 = geo.location;
@@ -195,8 +204,6 @@
 
 
     </script>
-    <script async defer
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAD2H9bS_-GCDwqR14E9ESCDRoj03s1CJk&callback=initMap"></script>
-    </script>
+
   </body>
 </html>
