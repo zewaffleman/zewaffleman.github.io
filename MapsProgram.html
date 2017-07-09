@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Simple markers</title>
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+        width: 100%;
+
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        position: relative;
+      }
+      #input{
+        position: absolute;
+        top: 68px;
+        z-index: 12;
+        right: 22px;
+
+      }
+    </style>
+
+
+
+<style>
+        input[type=text] {
+            width: 25%%;
+            padding: 12px 20px;
+
+            box-sizing: border-box;
+            border: 1px solid #555;
+            outline: none;
+            clear: left;
+            display: inline-block;
+            float:left;
+
+        }
+
+        input[type=text]:focus {
+            background-color: lightgreen;
+        }
+
+
+</style>
+  </head>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script type="text/javascript" src="jquery.sortElements.js"></script>
+
+  <body>
+    <div id="input">
+      <form >
+          <input type="text" name="Start" value="Start" id = "start"><br>
+          <input type="text" name="End  " value="End" id = "end"><br>
+          <input type="text" name="TextBox3" value="Distance "id="txtresult" ><br>
+
+      </form>
+
+      <button onclick="getInput()">Submit</button><br>
+    </div>
+
+
+    <div id="map"></div>
+    <script>
+    var APIKEY = "AIzaSyAD2H9bS_-GCDwqR14E9ESCDRoj03s1CJk";
+
+    var startURL = "https://maps.googleapis.com/maps/api/geocode/json?address=";
+    var latLng1;
+    var latLng2;
+    var name1;
+    var name2;
+
+
+    function getInput() {
+      var start = document.getElementById('start').value;
+      var end   = document.getElementById('end').value;
+
+      var URL1 =  startURL +start+ "&key=" + APIKEY;
+      var URL2 =  startURL +end+ "&key=" + APIKEY;
+      var obj;
+
+      $.get( URL1, function( data ) {
+        console.log(data);
+        obj = data.results[0];
+        var geo = obj.geometry;
+        latLng1 = geo.location;
+
+        name1 = obj.formatted_address;
+          console.log(name1);
+      });
+
+      $.get( URL2, function( data ) {
+        console.log(data);
+        obj = data.results[0];
+        var geo = obj.geometry;
+        latLng2 = geo.location;
+
+        name2 = obj.formatted_address;
+      });
+
+        initMap();
+        distance();
+
+    }
+
+    function initMap() {
+
+        var path = [];
+        path.push(latLng1);
+        path.push(latLng2);
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 10,
+          center: latLng1
+        });
+
+        var marker1 = new google.maps.Marker({
+          position: latLng1,
+          map: map,
+          title: name1
+        });
+
+        var marker2 = new google.maps.Marker({
+          position: latLng2,
+          map: map,
+          title: name2
+        });
+        line = new google.maps.Polyline({
+          path: path,
+          geodesic: true,
+          strokeColor: 'FF0000',
+          strokeWeight: 2
+
+        })
+        google.maps.event.trigger(map, 'resize');
+        line.setMap(map);
+      }
+
+    function distance(){
+
+      lat1R = latLng1.lat;
+      lat2R = latLng2.lat;
+      lon1R = latLng1.lng;
+      lon2R = latLng2.lng;
+
+
+      var R = 6371e3; // metres
+      var lat1R = lat1R * (Math.PI / 180);
+      var lat2R = lat2R * (Math.PI / 180);
+      var lon2R = lon2R * (Math.PI / 180);
+      var lon1R = lon1R * (Math.PI / 180);
+      var deltaLat = (lat2R - lat1R);
+      var deltaLamb = (lon2R - lon1R);
+
+      var distance = 2 * R * Math.asin(
+                      Math.sqrt(
+                              Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2)
+                              + Math.cos(lat1R) * Math.cos(lat2R)
+                              * Math.sin(deltaLamb / 2) * Math.sin(deltaLamb / 2)))
+
+      distance = ((distance / 1000)).toFixed(4);
+      distance = distance + " Km";
+      console.log(distance);
+      document.getElementById("txtresult").value = distance;
+        google.maps.event.trigger(map, 'resize');
+    }
+
+
+
+    </script>
+    <script async defer
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAD2H9bS_-GCDwqR14E9ESCDRoj03s1CJk&callback=initMap"></script>
+    </script>
+  </body>
+</html>
